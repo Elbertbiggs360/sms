@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sms
+  labels:
+    app: sms
+spec:
+  ports:
+    - port: 3000
+  selector:
+    app: sms
+    tier: backend
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sms
+  labels:
+    app: sms
+spec:
+  selector:
+    matchLabels:
+      app: sms
+      tier: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: sms
+        tier: backend
+    spec:
+      containers:
+      - image: enkya.org/enkya-sms-01/sms:1.0.0
+        name: sms
+        ports:
+        - containerPort: 3000
+          name: sms
