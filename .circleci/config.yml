@@ -1,0 +1,53 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: wecs/circle-ci-gcloud-node:0.1.0
+    working_directory: ~/workspace
+    environment:
+      DEPLOYMENT_NAME: sms
+      PROJECT_ID: enkya-sms-01
+      CLUSTER_NAME: enkya
+      CLUSTER_NAME_STAG: us-central1-a
+      CONTAINER_NAME: sms
+      IMAGE: sms
+      REG_ID: sms
+      REG_ID_PROD: sms-prod
+      IMG_TAG: 1.0.0
+      PROJECT_NAME: sms
+      DEPLOYMENT_ENVIRONMENT: staging
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run:
+          name: Install node packages
+          command: |
+            npm install
+      
+      - run:
+          name: Start app
+          command: |
+            npm start &
+      - run:
+          name: Run tests
+          command: |
+            npm test
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      
+      - run:
+          name: Build and Deploy
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./deployment.sh
+            fi 
