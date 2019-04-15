@@ -32,10 +32,10 @@ jobs:
           name: Start app
           command: |
             npm start &
-      - run:
-          name: Run tests
-          command: |
-            npm test
+      # - run:
+      #     name: Run tests
+      #     command: |
+      #       npm test
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "package.json" }}
